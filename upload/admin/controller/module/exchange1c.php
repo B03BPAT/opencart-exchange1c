@@ -19,7 +19,7 @@ class ControllerModuleExchange1c extends Controller {
 			$this->redirect($this->url->link('extension/module', 'token=' . $this->session->data['token'], 'SSL'));
 		}
 
-		$this->data['version'] = 'Version 1.6.0';
+		$this->data['version'] = 'Version 1.6.0.1';
 
 		$this->data['heading_title'] = $this->language->get('heading_title');
 		$this->data['entry_username'] = $this->language->get('entry_username');
@@ -38,6 +38,17 @@ class ControllerModuleExchange1c extends Controller {
 		$this->data['entry_fill_parent_cats'] = $this->language->get('entry_fill_parent_cats');
 		$this->data['entry_delimiter'] = $this->language->get('entry_delimiter');
 		$this->data['entry_delimiter_help'] = $this->language->get('entry_delimiter_help');
+		$this->data['autofill_image_category'] = $this->language->get('autofill_image_category');
+		$this->data['autofill_image_category_help'] = $this->language->get('autofill_image_category_help');
+		$this->data['autofill_image_options'] = $this->language->get('autofill_image_options');
+		$this->data['autofill_image_options_help'] = $this->language->get('autofill_image_options_help');
+		$this->data['type_created_options'] = $this->language->get('type_created_options');
+		$this->data['type_created_options_listbox'] = $this->language->get('type_created_options_listbox');
+		$this->data['type_created_options_image_radio'] = $this->language->get('type_created_options_image_radio');
+		$this->data['type_created_options_checkbox'] = $this->language->get('type_created_options_checkbox');
+		$this->data['type_created_options_picture'] = $this->language->get('type_created_options_picture');
+		$this->data['autofill_image_manufacturers'] = $this->language->get('autofill_image_manufacturers');
+		$this->data['autofill_image_manufacturers_help'] = $this->language->get('autofill_image_manufacturers_help');
 		$this->data['entry_seo_url'] = $this->language->get('entry_seo_url');
 		$this->data['entry_seo_url_deadcow'] = $this->language->get('entry_seo_url_deadcow');
 		$this->data['entry_seo_url_translit'] = $this->language->get('entry_seo_url_translit');
@@ -162,7 +173,36 @@ class ControllerModuleExchange1c extends Controller {
 		else {
 			$this->data['delimiter_symbol'] = $this->config->get('delimiter_symbol');
 		}
-		
+
+		if (isset($this->request->post['autofill_image_category_path'])) {
+			$this->data['autofill_image_category_path'] = $this->request->post['autofill_image_category_path'];
+		}
+		else {
+			$this->data['autofill_image_category_path'] = $this->config->get('autofill_image_category_path');
+		}
+
+		if (isset($this->request->post['autofill_image_options_path'])) {
+			$this->data['autofill_image_options_path'] = $this->request->post['autofill_image_options_path'];
+		}
+		else {
+			$this->data['autofill_image_options_path'] = $this->config->get('autofill_image_options_path');
+		}
+
+		if (isset($this->request->post['created_options_type'])) {
+			$this->data['created_options_type'] = $this->request->post['created_options_type'];
+		}
+		else {
+			$this->data['created_options_type'] = $this->config->get('created_options_type');
+		}
+
+		if (isset($this->request->post['autofill_image_manufacturers_path'])) {
+			$this->data['autofill_image_manufacturers_path'] = $this->request->post['autofill_image_manufacturers_path'];
+		}
+		else {
+			$this->data['autofill_image_manufacturers_path'] = $this->config->get('autofill_image_manufacturers_path');
+		}
+
+
 		if (isset($this->request->post['exchange1c_status'])) {
 			$this->data['exchange1c_status'] = $this->request->post['exchange1c_status'];
 		}
@@ -521,7 +561,7 @@ class ControllerModuleExchange1c extends Controller {
 				if ($result === strlen($data)) {
 					echo "success\n";
 
-					chmod($uplod_file , 0777);
+					chmod($uplod_file , 0644);
 					//echo "success\n";
 				}
 				else {

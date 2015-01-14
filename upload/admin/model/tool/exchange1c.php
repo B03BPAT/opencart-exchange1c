@@ -168,6 +168,9 @@ class ModelToolExchange1c extends Model {
 		$exchange1c_relatedoptions = $this->config->get('exchange1c_relatedoptions');
 		$delimiter_symbol = $this->config->get('delimiter_symbol');
 
+		$autofill_image_category_path = $this->config->get('autofill_image_category_path');
+		$autofill_image_options_path  = $this->config->get('autofill_image_options_path');
+
 		$this->load->model('catalog/option');
 
 		if ($enable_log)
@@ -297,7 +300,7 @@ class ModelToolExchange1c extends Model {
 	
 							$option_id = $this->setOption($name_1c);
 							
-							$option_value_id = $this->setOptionValue($option_id, $value_1c);
+							$option_value_id = $this->setOptionValue($option_id, $value_1c, $name_1c);
 							
 							$product_option_value_data[] = array(
 								'option_value_id'         => (int) $option_value_id,
@@ -404,14 +407,23 @@ class ModelToolExchange1c extends Model {
 		}
         else {
 			//Нет такой опции
-			$this->db->query("INSERT INTO `" . DB_PREFIX . "option` SET type = 'select', sort_order = '0'");
+			$opt_type = $this->config->get('created_options_type');
+			switch ($opt_type) {
+			    case 0:  $selector_type = 'select'; break;
+			    case 1:  $selector_type = 'radio'; break;
+			    case 2:  $selector_type = 'checkbox'; break;
+			    case 3:  $selector_type = 'image'; break;
+			    default: $selector_type = 'select'; break;
+			}
+
+			$this->db->query("INSERT INTO `" . DB_PREFIX . "option` SET type = '". $selector_type ."', sort_order = '0'");
 			$option_id = $this->db->getLastId();
 			$this->db->query("INSERT INTO " . DB_PREFIX . "option_description SET option_id = '" . $option_id . "', language_id = '" . $lang_id . "', name = '" . $this->db->escape($name) . "'");
 		}
 		return $option_id;
 	}
 
-	private function setOptionValue($option_id, $value) {
+	private function setOptionValue($option_id, $value, $options_name) {
 		$lang_id = (int)$this->config->get('config_language_id');
 
 		$query = $this->db->query("SELECT option_value_id FROM ". DB_PREFIX ."option_value_description WHERE name='". $this->db->escape($value) ."' AND option_id='". $option_id ."'");
@@ -421,7 +433,15 @@ class ModelToolExchange1c extends Model {
 		}
 		else {
 			//Добавляем значение опции, только если нет в базе
-			$this->db->query("INSERT INTO " . DB_PREFIX . "option_value SET option_id = '" . $option_id . "', image = '', sort_order = '0'");
+			$option_image_path = $this->config->get('autofill_image_options_path');
+			    if ($option_image_path) {$option_image_path = "data/". $option_image_path . "/" . $this->transString($this->db->escape($options_name)) . "/" . $this->transString($this->db->escape($value)) . ".jpg";
+			    $this->log->write(" Картинка для опции: " . $option_image_path);
+			    
+			    $this->db->query("INSERT INTO " . DB_PREFIX . "option_value SET option_id = '" . $option_id . "', image = '" . $option_image_path . "', sort_order = '0'");
+			}
+			else {
+			    $this->db->query("INSERT INTO " . DB_PREFIX . "option_value SET option_id = '" . $option_id . "', image = '', sort_order = '0'");
+			}
 			$option_value_id = $this->db->getLastId();
 			$this->db->query("INSERT INTO " . DB_PREFIX . "option_value_description SET option_value_id = '".$option_value_id."', language_id = '" . $lang_id . "', option_id = '" . $option_id . "', name = '" . $this->db->escape($value) . "'");
 		}
@@ -499,8 +519,10 @@ class ModelToolExchange1c extends Model {
                                         $data['manufacturer_id'] = $query->row['manufacturer_id'];
                                 }
 									else {
+										if ($this->config->get('autofill_image_manufacturers_path')) { $manufacturer_name_image_path = "data/" . $this->config->get('autofill_image_manufacturers_path') . "/"  .  $this->transString($manufacturer_name) . ".jpg" ; } else { $manufacturer_name_image_path = ''; }
 													$data_manufacturer = array(
 														'name'                  => $manufacturer_name,
+														'image'			=> $manufacturer_name_image_path,
 														'keyword'               => '',
 														'sort_order'            => 0,
 														'manufacturer_store'    => array(0 => 0)
@@ -552,8 +574,10 @@ class ModelToolExchange1c extends Model {
 										$data['manufacturer_id'] = $query->row['manufacturer_id'];
 									}
 									else {
+										if ($this->config->get('autofill_image_manufacturers_path')) { $manufacturer_name_image_path = "data/" . $this->config->get('autofill_image_manufacturers_path') . "/"  .  $this->transString($manufacturer_name) . ".jpg" ; } else { $manufacturer_name_image_path = ''; }
 										$data_manufacturer = array(
 											'name' => $manufacturer_name,
+											'image' => $manufacturer_name_image_path,
 											'keyword' => '',
 											'sort_order' => 0,
 											'manufacturer_store' => array(0 => 0)
@@ -571,6 +595,9 @@ class ModelToolExchange1c extends Model {
 
 										$manufacturer_id = $this->model_catalog_manufacturer->addManufacturer($data_manufacturer);
 										$data['manufacturer_id'] = $manufacturer_id;
+
+										if ($enable_log)
+											$this->log->write($manufacturer_name . "   > " . $manufacturer_id);
 
 										//только если тип 'translit'
 										if ($this->config->get('exchange1c_seo_url') == 2) {
@@ -688,7 +715,6 @@ class ModelToolExchange1c extends Model {
 				$id =  (string)$category->Ид;
 
 				$data = array();
-
 				$query = $this->db->query('SELECT * FROM `' . DB_PREFIX . 'category_to_1c` WHERE `1c_category_id` = "' . $this->db->escape($id) . '"');
 
 				if ($query->num_rows) {
@@ -700,13 +726,22 @@ class ModelToolExchange1c extends Model {
 				}
 				else {
 					$data = $this->initCategory($category, $parent, array(), $language_id);
-					//$category_id = $this->getCategoryIdByName($data['category_description'][1]['name']) ? $this->getCategoryIdByName($data['category_description'][1]['name']) : $this->model_catalog_category->addCategory($data);
 					$category_id = $this->model_catalog_category->addCategory($data);
 					$this->db->query('INSERT INTO `' . DB_PREFIX . 'category_to_1c` SET category_id = ' . (int)$category_id . ', `1c_category_id` = "' . $this->db->escape($id) . '"');
 				}
 
 				$this->CATEGORIES[$id] = $category_id;
 			}
+
+			if ($this->config->get('autofill_image_category_path')) {
+				$cat_name = $data['category_description'][$language_id]['name'];
+				$path_to_img = "data/". $this->config->get('autofill_image_category_path') . "/". $this->transString($cat_name) .".jpg";
+				$this->log->write("Вызов из категории:". $category_id );
+				$this->log->write("Строка для вставки:". $path_to_img );
+				$this->log->write("UPDATE `". DB_PREFIX . "category` SET `image` = '" . $path_to_img .  "' WHERE `category_id`=". $category_id);
+				 $this->db->query("UPDATE `". DB_PREFIX . "category` SET `image` = '" . $path_to_img .  "' WHERE `category_id`=". $category_id);
+				}
+
 
 			//только если тип 'translit'
 			if ($this->config->get('exchange1c_seo_url') == 2) {
@@ -1374,10 +1409,11 @@ class ModelToolExchange1c extends Model {
 			if ($enable_log)
 				$this->log->write("Очистка таблиц производителей:");
 			$this->db->query('TRUNCATE TABLE ' . DB_PREFIX . 'manufacturer');
-			if ($enable_log)
+			if ($enable_log) {
 				$this->log->write('TRUNCATE TABLE ' . DB_PREFIX . 'manufacturer');
-
-			$query = $this->db->query("SHOW TABLES FROM " . DB_DATABASE . " LIKE '" . DB_PREFIX . "manufacturer_description'");
+				$this->log->write("SHOW TABLES FROM " . DB_DATABASE . " LIKE '" . DB_PREFIX . "manufacturer_description'");
+			}
+			$query = $this->db->query("SHOW TABLES LIKE '" . DB_PREFIX . "manufacturer_description'");
 			if ($query->num_rows) {
 				if ($enable_log) {
 					$this->log->write("Очистка таблиц описания производителей:");

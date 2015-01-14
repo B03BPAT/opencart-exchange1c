@@ -64,3 +64,20 @@ $_['button_upload']		= 'Upload';
 
 // Error
 $_['error_permission']		= 'Premission denied!';
+
+//Autload images
+$_['autofill_image_category']	= 'Automatically assign pictures on categories';
+$_['autofill_image_category_help']	= '';
+$_['autofill_image_options']	= 'Automatically assign pictures on product options';
+$_['autofill_image_options_help']	= '';
+
+//Type options
+$_['type_created_options']	='Type of created options';
+$_['type_created_options_listbox']	='Listbox';
+$_['type_created_options_image_radio']	='Radiobox';
+$_['type_created_options_checkbox']	='Checkbox';
+$_['type_created_options_picture']	='Picture';
+
+//Autoload manufacturers images
+$_['autofill_image_manufacturers']	= 'Automatically assign pictures for manufacturers';
+$_['autofill_image_manufacturers_help']	= 'Assign JPG pictures from preferences folder';

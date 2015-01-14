@@ -165,13 +165,59 @@
               </td>
             </tr>
 			
-			<tr>
-              <td><?php echo $entry_delimiter; ?></td>
-              <td><input name="delimiter_symbol" type="delimiter" value="<?php echo $delimiter_symbol; ?>" />
-			  <span class="help"><?php echo $entry_delimiter_help; ?></span>
-			  </td>
+	    <tr>
+              <td>
+		    <?php echo $entry_delimiter; ?>
+	      </td>
+              <td>
+		    <input name="delimiter_symbol" type="delimiter" value="<?php echo $delimiter_symbol; ?>" />
+		    <span class="help"><?php echo $entry_delimiter_help; ?></span>
+	      </td>
             </tr>
-			            
+	    <tr>
+	      <td>
+		    <?php echo $autofill_image_category; ?>
+	      </td>
+	      <td>
+		    <input name="autofill_image_category_path" type="search_image_category_path" value="<?php echo $autofill_image_category_path; ?>" />
+		    <span class="help"><?php echo $autofill_image_category_help; ?></span>
+	      </td>
+	    </tr>
+
+            <tr>
+
+	      <td>
+		    <?php echo $autofill_image_options; ?>
+	      </td>
+	      <td>
+		    <input name="autofill_image_options_path" type="search_image_options_path" value="<?php echo $autofill_image_options_path; ?>" />
+		    <span class="help"><?php echo $autofill_image_options_help; ?></span>
+	      </td>
+	    </tr>
+
+            <tr>
+
+	      <td>
+		    <?php echo $autofill_image_manufacturers; ?>
+	      </td>
+	      <td>
+		    <input name="autofill_image_manufacturers_path" type="autofill_image_manufacturers_path" value="<?php echo $autofill_image_manufacturers_path; ?>" />
+		    <span class="help"><?php echo $autofill_image_manufacturers_help; ?></span>
+	      </td>
+	    </tr>
+
+            <tr>
+              <td><?php echo $type_created_options; ?></td>
+              <td>
+                <select name="created_options_type">
+                  <option value="0" <?php echo ($created_options_type == 0) ? 'selected' : '' ;?>><?php echo $type_created_options_listbox; ?></option>
+                  <option value="1" <?php echo ($created_options_type == 1) ? 'selected' : '' ;?>><?php echo $type_created_options_image_radio; ?></option>
+                  <option value="2" <?php echo ($created_options_type == 2) ? 'selected' : '' ;?>><?php echo $type_created_options_checkbox; ?></option>
+                  <option value="3" <?php echo ($created_options_type == 3) ? 'selected' : '' ;?>><?php echo $type_created_options_picture; ?></option>
+                </select>
+              </td>
+            </tr>
+
             <tr>
               <td><label for="exchange1c_dont_use_artsync"><?php echo $entry_dont_use_artsync; ?></label></td>
               <td>
@@ -284,7 +330,7 @@
     </div>
 
     <div style="text-align:center; opacity: .5">
-      <p><?php echo $version; ?> | <a href=https://github.com/zenwalker/opencart-exchange1c><?php echo $source_code; ?></a> <a href="http://zenwalker.ru/lab/opencart-exchange1c"><?php echo $text_homepage; ?></a></p>
+      <p><?php echo $version; ?> | <a href=https://github.com/zenwalker/opencart-exchange1c><?php echo $source_code; ?></a> <a href="http://zenwalker.ru/lab/opencart-exchange1c"><?php echo $text_homepage; ?></a> | <a href="http://kharkevich.org"> Fork by Aliaksandr Kharkevich</a></p>
     </div>
   </div>
 </div>
